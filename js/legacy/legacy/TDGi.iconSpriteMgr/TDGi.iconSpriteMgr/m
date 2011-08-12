@@ -1,0 +1,7 @@
+X=0
+	for i in `ls | grep png | sort`; do 
+	name=`echo $i | awk -F. '{print $1}'`
+	printf "{n:'$name',f:'$i',y:$X},"
+	X=`echo $X+16 | bc` 
+done
+

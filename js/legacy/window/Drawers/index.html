@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Window Drawer Basic Example</title>
+<link rel="stylesheet" type="text/css" href="/js/extjs/resources/css/ext-all.css" />
+<script type="text/javascript" src="/js/extjs/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/js/extjs/ext-all-debug.js"></script>
+
+    <script language="javascript" src="Ext.ux.plugins.WindowDrawer.js"></script>
+
+
+    <script language="javascript">
+		/*
+			Author       : Jay Garcia
+			Site         : http://tdg-i.com
+			Contact Info : jgarcia@tdg-i.com
+			Purpose      : Window Drawers for Ext 2.x Ext.Window class, which emulates OS X behaviors
+			Warranty     : none
+			Price        : free
+			Version      : 1b1
+			Date         : 11/23/2008
+			
+		*/
+		
+		var windows = new Ext.WindowGroup();
+			
+		Ext.onReady(function(){
+
+			var win;
+			
+			var genericTbar = [
+				{
+					text : 'Button1'
+				},
+				{
+					text : 'Button2'
+				}
+			];
+			
+			new Ext.Window({
+				title : 'Win 1',
+				html  : 'Win 1',
+				width : 100,
+				height : 100		
+			
+			}).show();
+
+			
+			new Ext.Window({
+				manager : windows,
+				title : 'Win 2',
+				html  : 'Win 2',
+				width : 100,
+				height : 100		
+			
+			}).show();
+
+			win = new Ext.Window({
+				manager : windows,
+			
+				layout      : 'fit',
+				width       : 350,
+				height      : 250,
+				modal       : false,
+				minHeight   : 225,
+				closeAction :'hide',
+				plain       : true,
+				closable    : false,
+				constrain   : true,
+				title       : 'Example Window with Four Drawers',
+				buttonAlign : 'center',
+				tbar        : [
+					{
+						text: 'SHOW ALL',
+						handler: function() {
+							win.drawers.n.show();
+							win.drawers.s.show();
+							win.drawers.w.show();
+							win.drawers.e.show();
+						}
+						
+					}, 
+					'->',
+					{
+						text: 'HIDE ALL',
+						handler: function() {
+							win.drawers.n.hide();
+							win.drawers.s.hide();
+							win.drawers.w.hide();
+							win.drawers.e.hide();
+						}					
+					}
+				],
+				bbar: [
+					{
+						text: 'ST',
+						handler: function() {
+							win.drawers.n.show(true);
+						}
+						
+					},
+					{
+						text: 'SR',
+						handler: function() {
+							win.drawers.e.show();
+						}
+					},
+					{
+						text: 'SB',
+						handler: function() {
+							win.drawers.s.show();
+						}
+					},			
+					{
+						text: 'SL',
+						handler: function() {
+							win.drawers.w.show();
+						}
+						
+					},
+					'->',
+					{
+						text: 'HT',
+						handler: function() {
+							win.drawers.n.hide(true);
+						}
+					},
+					{
+						text: 'HR',
+						handler: function() {
+							win.drawers.e.hide();
+						}
+					},
+					{
+						text: 'HB',
+						handler: function() {
+							win.drawers.s.hide();
+						}
+					},
+					{
+						text: 'HL',
+						handler: function() {
+							win.drawers.w.hide();
+						}
+					}
+					
+				
+				],
+				plugins : [
+					new Ext.ux.plugins.WindowDrawer({
+						xtype     : 'windowdrawer',
+						html      : 'EAST',
+						side      : 'e', // Can be n e s w
+						animate   : true,
+						tbar      : genericTbar,
+						resizable : true,
+						width     : 150,
+						minWidth  : 150
+					}),
+					new Ext.ux.plugins.WindowDrawer({
+						xtype     : 'windowdrawer',
+						html      : 'WEST',
+						side      : 'w', // Can be n e s w
+						animate   : true,
+						bbar      : genericTbar,
+						resizable : true,
+						closable  : true,
+						title     : 'West Drawer',
+						width     : 150,
+						minWidth  : 150
+					}),
+					new Ext.ux.plugins.WindowDrawer({
+						xtype     : 'windowdrawer',
+						height    : 120,
+						minHeight : 120,
+						html      : 'NORTH',
+						side      : 'n', // Can be n e s w
+						resizable : true,
+						title     : 'North Drawer - No animation - title',
+						//animate   : true,
+						tbar      : genericTbar
+					}),
+					new Ext.ux.plugins.WindowDrawer({
+						xtype     : 'windowdrawer',
+						height    : 120,
+						minHeight : 120,
+						html      : 'Sout Drawer - No Animatoin -  no title',
+						side      : 's', // Can be n e s w
+						//animate   : true,
+						bbar      : genericTbar,
+						resizable : true
+						
+					})
+					
+				]
+			});
+			
+			win.show();	
+			
+			new Ext.Window({
+							manager : windows,
+
+				title  : 'Win 3',
+				html   : 'Win 3',
+				width  : 100,
+				height : 100		
+			}).show();
+
+			
+			new Ext.Window({
+				manager : windows,
+			
+				title : 'Win 4',
+				html  : 'Win 4',
+				width : 100,
+				height : 100,
+				resizable : true,
+				minHeight : 200,
+				maxHeight : 300,
+				minWidth : 200,
+				maxWidth : 200,
+				constrain : true	
+			}).show();
+		
+		
+		});    
+    </script>
+
+
+</head>
+<body>
+</body>
+</html>

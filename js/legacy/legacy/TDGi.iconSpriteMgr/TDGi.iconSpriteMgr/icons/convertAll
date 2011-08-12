@@ -1,0 +1,6 @@
+for png in `ls | grep png`
+do
+	gif=`echo $png | sed -e "s/png/gif/g"`
+	echo "$png -> $gif"
+	convert $png $gif
+done

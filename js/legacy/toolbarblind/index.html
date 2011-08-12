@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Ext JS 3.0 Introduction</title>
+<link rel="stylesheet" type="text/css" href="../ext-2.2.1/resources/css/ext-all.css" />
+<script type="text/javascript" src="../ext-2.2.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="../ext-2.2.1/ext-all-debug.js"></script>
+<script type="text/javascript" src="Ext.plugins.TDGi.ToolbarBlind.js"></script>
+
+
+</head>
+
+
+<script type="text/javascript">
+Ext.onReady(function() {
+    var tbarPlugin = new Ext.ux.TDGi.ToolbarBlind({
+        hideOnbtnclick : true,
+        toolbarCfg     : {
+            items : [
+                {
+                    text : 'plugin button 1'
+                },
+                {
+                    text : 'plugin button 2'
+                }
+            ]
+
+        }
+
+    });
+ 
+    new Ext.Window({
+        height      : 300,
+        width       : 300,
+        tbar        : {
+            plugins : [tbarPlugin],
+            items   : [
+                {
+                    text    : 'Bar Btn 1',
+                    handler : function() {
+                        this.ownerCt.blind.show();    
+                    }
+                }
+            ]
+        },
+        bbar        : {
+            plugins : [],
+            items   : [
+                {
+                    text : 'BBar Btn 1'
+                }
+            ]
+        }
+
+    }).show();
+
+});
+
+
+
+</script>
+</head>
+<body>
+</body>
+</html>
