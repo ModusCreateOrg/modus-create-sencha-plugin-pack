@@ -1,0 +1,66 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>Jay Garcia Ext JS dev page</title>
+
+    <!-- ExtJS -->
+    <link rel="stylesheet" type="text/css" href="js/sdk/resources/css/ext-all.css" />
+    <script type="text/javascript" src="js/sdk/ext.js"></script>
+    <script type="text/javascript">
+//        Ext.require('Ext.window.Window');
+
+        Ext.Loader.setConfig({
+            enabled : true,
+            paths   : {
+                MC : 'js/MC'
+            }
+        });
+
+        Ext.require([
+            'MC.util.Icons',
+            'Ext.Button',
+            'Ext.tab.Panel'
+        ]);
+
+        Ext.onReady(function() {
+//            MC.util.Icons.get('add');
+//            return;
+            Ext.create('Ext.Button', {
+                text     : 'Click to see IconBrowser (May be slow over the inter-tubes)',
+                iconCls  : MC.util.Icons.get('application_osx_double'),
+                renderTo : Ext.getBody(),
+                handler  : function() {
+//                    Ext.ux.TDGi.iconBrowser.show();
+                }
+            });
+
+            Ext.create('Ext.tab.Panel', {
+                width      : 500,
+                height     : 200,
+                activeItem : 0,
+                renderTo   : Ext.getBody(),
+                items      : [
+                    {
+                        iconCls : MC.util.Icons.get('cross'),
+                        title   : 'MC.icons',
+                        html    : "iconCls : MC.icons.get('cross')"
+                    },
+
+                    {
+                        iconCls : MC.util.Icons.get('application_osx_link'),
+                        title   : 'is real easy to use too',
+                        html    : "iconCls : MC.icons.get('application_osx_link')"
+                    }
+                ]
+            });
+        });
+
+
+
+
+
+    </script>
+</head>
+<body>
+</body>
+</html>
