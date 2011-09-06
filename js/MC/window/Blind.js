@@ -22,7 +22,7 @@
  */
 Ext.define('MC.window.Blind',{
     extend    : 'Ext.panel.Panel',
-
+    height    : 100,
     alias     : 'plugin.MC.window.Blind',
     headerSelector : '.x-window-header',
     style   : 'border-top: none;',
@@ -36,19 +36,34 @@ Ext.define('MC.window.Blind',{
     animDuration : 250,
     offsetHeight : 20,
     offsetWidth  : 12,
+
     /**
      * @public
      * @param {Boolean} skipAnim true to skip animation
      */
+
     // private
-    init : function(win) {
+    initComponent : function() {
         var me = this;
-        me.win = win;
+        delete me.renderTo;
+        me.origHeight = me.height;
+        me.callParent();
+        me.on({
+            scope      : me,
+			beforeshow : me.onBeforeShow,
+			beforehide : me.onBeforeHide
+		});
+    },
+
+    // private
+    init : function(parent) {
+        var me = this;
+        me.parent = parent;
 
 
-        // Attach the me as the win
-        win.blind = me;
-        win.on({
+        // Attach the me as the parent
+        parent.blind = me;
+        parent.on({
             scope       : me,
             afterrender : me.onParentAfterRender,
             destroy     : me.destroy,
@@ -63,9 +78,9 @@ Ext.define('MC.window.Blind',{
     show : function(skipAnim) {
         var me = this;
 
-        var winHeader = me.win.header;
+        var parentHeader = me.parent.header;
         // <debug>
-        if (! winHeader || winHeader.dock !== 'top') {
+        if (! parentHeader || parentHeader.dock !== 'top') {
             Ext.Error.raise('A top-docked header must be available for me to attach to!');
             return;
         }
@@ -106,25 +121,13 @@ Ext.define('MC.window.Blind',{
         me.hidden = true;
     },
 
-    // private
-    initComponent : function() {
-        var me = this;
-        delete me.renderTo;
-
-        this.callParent();
-        me.on({
-            scope      : me,
-			beforeshow : me.onBeforeShow,
-			beforehide : me.onBeforeHide
-		});
-    },
-
 
 	//private
 	onBeforeHide : function() {
 		if (this.animate) {
 			this.getEl().addClass('x-panel-animated');
 		}
+
 	},
     /**
      * @private
@@ -132,29 +135,33 @@ Ext.define('MC.window.Blind',{
      */
 	onAfterAnimHide : function() {
         var me       = this,
-            thisWin  = me.win,
-            toolbars = Ext.ComponentQuery.query('toolbar', thisWin);
+            thisParent  = me.parent,
+            toolbars = Ext.ComponentQuery.query('toolbar', thisParent);
 
         me.el.setVisible(false);
-        thisWin.body.unmask();
+        thisParent.body.unmask();
 
 
         Ext.each(toolbars, function(tb) {
             tb.el.unmask();
         });
 
-        me.fireEvent('hide', me)
+        me.fireEvent('hide', me);
+
+        if (thisParent.resizer) {
+            thisParent.resizer.enable();
+        }
     },
 
     // private
     onBeforeShow : function() {
 
-        var me       = this,
-            thisWin  = me.win,
-            toolbars = Ext.ComponentQuery.query('toolbar', thisWin);
+        var me         = this,
+            thisParent = me.parent,
+            toolbars   = Ext.ComponentQuery.query('toolbar', thisParent);
 
-        thisWin.body.mask();
-        thisWin.body.down('.x-mask').setStyle({
+        thisParent.body.mask();
+        thisParent.body.down('.x-mask').setStyle({
             'background': 'none'
         });
 
@@ -169,19 +176,24 @@ Ext.define('MC.window.Blind',{
             me.render(me.renderTo);
             delete me.renderTo;
         }
+        
+        if (thisParent.resizer) {
+            thisParent.resizer.disable();
+        }
     },
 
     //private
     onParentAfterRender : function(parent) {
-        var me = this,
-            hdrSelector       = '.x-window-header', // default to window
-            parentClassName   = parent.$className,
-            isParentPanel     = parentClassName == 'Ext.panel.Panel',
-            isParentWindow    = parentClassName == 'Ext.window.Window',
-            isParentContainer = parentClassName == 'Ext.container.Container',
-            newParentHeight;
-
-            me.parentTitleBarHeight = 0
+        var me                   = this,
+            hdrSelector          = '.x-window-header', // default to window
+            parentClassName      = parent.$className,
+            parentEl             = parent.el,
+            isParentPanel        = parentClassName == 'Ext.panel.Panel',
+            isParentWindow       = parentClassName == 'Ext.window.Window',
+            isParentContainer    = parentClassName == 'Ext.container.Container',
+            parentTitleBarHeight = 0,
+            newParentHeight,
+            potentialHeight;
 
         if (isParentPanel) {
             hdrSelector = '.x-panel-header';
@@ -189,33 +201,37 @@ Ext.define('MC.window.Blind',{
 
         if (isParentContainer) {
             me.offsetHeight = 0;
-
         }
         else {
-            me.parentTitleBarHeight = parent.el.child(hdrSelector).getHeight();
+            parentTitleBarHeight = parentEl.child(hdrSelector).getHeight();
 
             if (isParentWindow) {
-                newParentHeight = me.parentTitleBarHeight + 5;
+                newParentHeight = parentTitleBarHeight + 5;
             }
             else if (isParentPanel) {
-                newParentHeight = me.parentTitleBarHeight - 1;
+                newParentHeight = parentTitleBarHeight - 1;
             }
 
         }
 
+        me.parentTitleBarHeight = parentTitleBarHeight;
 
+        potentialHeight = parent.body.getHeight() + (parentTitleBarHeight - me.offsetHeight);
 
-
-        this.renderTo = parent.el;
-        this.style    = (this.style || '') + 'z-index: 101;position:absolute;top: ' + newParentHeight +'px; left: 10px;';
-        this.height   = this.height || parent.body.getHeight() + (me.parentTitleBarHeight - me.offsetHeight);
+        me.renderTo = parentEl;
+        me.style    = (me.style || '') + 'z-index: 101;position:absolute;top: ' + newParentHeight +'px; left: 10px;';
+        this.onWinResize(me.parent);
     },
     // private
-    onWinResize : function(win) {
-        var me = this,
-            winBody = win.body,
-            newWidth = winBody.getWidth() - me.offsetWidth,
-            newHeight = winBody.getHeight() + (me.parentTitleBarHeight - me.offsetHeight);
+    onWinResize : function(parent) {
+        var me              = this,
+            parentEl        = parent.el,
+            parentBody      = parent.body,
+            origHeight      = me.origHeight,
+            potentialHeight = parentEl.getHeight() - (me.parentTitleBarHeight  + me.offsetHeight),
+            newWidth        = parentBody.getWidth() - me.offsetWidth,
+            amITaller       = (origHeight > potentialHeight),
+            newHeight       = amITaller ? potentialHeight : origHeight;
 
         me.setSize(newWidth,newHeight);
     }
