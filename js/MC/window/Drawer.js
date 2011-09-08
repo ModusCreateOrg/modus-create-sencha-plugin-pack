@@ -1,29 +1,3 @@
-/*
-    Author       : Jay Garcia
-    Site         : http://tdg-i.com
-    Contact Info : jgarcia@tdg-i.com
-    Purpose      : Window Drawers for Ext 2.x Ext.Window class, which emulates OS X behaviors
-	Contributors : Mystix, http://extjs.com/forum/member.php?u=1459
-	 			   Hendricd, http://extjs.com/forum/member.php?u=8730
-
-    Warranty     : none
-    license      : GPLV3
-    Price        : free
-    Version      : 1.0
-    Date         : 06/08/2010
-*/
-
-
-/**
-* @class Ext.plugins.TDGi.WindowDrawer
-* @extends Ext.Window
-* <p>Window Drawers for Ext 3.x Ext.Window class, which emulates OS X behavior.</p>
-* @constructor
-* @param {Object} config The config object
-*/
-Ext.ns('Ext.plugins.TDGi');
-
-// Drawer Base Class
 Ext.define('MC.window.Drawer', {
     extend : 'Ext.window.Window',
     alias  : 'plugin.drawer',
