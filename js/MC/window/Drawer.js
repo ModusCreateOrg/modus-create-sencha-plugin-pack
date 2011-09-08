@@ -7,265 +7,321 @@
 	 			   Hendricd, http://extjs.com/forum/member.php?u=8730
 
     Warranty     : none
+    license      : GPLV3
     Price        : free
-    Version      : 1.0 Beta 1
-    Date         : 11/23/2008
+    Version      : 1.0
+    Date         : 06/08/2010
 */
 
-// Need to override the Window DnD to allow events to fire.
-Ext.override(Ext.Window.DD, {
-    // private - used for dragging
-    startDrag : function() {
-        var w = this.win;
-        w.fireEvent('ghost', []);
-        this.proxy = w.ghost();
-        if (w.constrain !== false) {
-            var so = w.el.shadowOffset;
-            this.constrainTo(w.container, {right: so, left: so, bottom: so});
-        } else if (w.constrainHeader !== false) {
-            var s = this.proxy.getSize();
-            this.constrainTo(w.container, {right: -(s.width - this.headerOffsets[0]), bottom: -(s.height - this.headerOffsets[1])});
-        }
-    }
-});
 
-
-// Need to override the Window class to allow events to fire for front and back movement.
-Ext.override(Ext.Window, {
-    setZIndex : function(index) {
-        var newZIndex = ++index;
-
-        if (this.modal) {
-            this.mask.setStyle("z-index", index);
-        }
-
-        this.el.setZIndex(newZIndex);
-        index += 5;
-
-        if (this.resizer) {
-            this.resizer.proxy.setStyle("z-index", ++index);
-        }
-        if (newZIndex > this.lastZIndex) {
-            this.fireEvent('tofront', this);
-        } else {
-            this.fireEvent('toback', this);
-        }
-        this.lastZIndex = index;
-    }
-});
-
-Ext.ns('Ext.ux.plugins');
+/**
+* @class Ext.plugins.TDGi.WindowDrawer
+* @extends Ext.Window
+* <p>Window Drawers for Ext 3.x Ext.Window class, which emulates OS X behavior.</p>
+* @constructor
+* @param {Object} config The config object
+*/
+Ext.ns('Ext.plugins.TDGi');
 
 // Drawer Base Class
-Ext.ux.plugins.WindowDrawer = Ext.extend(Ext.Window, {
-    closable : false,
-    resizable : false,
+Ext.define('MC.window.Drawer', {
+    extend : 'Ext.window.Window',
+    alias  : 'plugin.drawer',
+    minWidth : 100,
+    /**
+     * suggested
+     * configs
+     */
+//    shadow : false,
+    closable    : false,
+    resizable   : false,
+    draggable   : false,
+    modal       : false,
+    closeAction : 'hide',
 
-    show : function(skipAnim) {
-        if (this.hidden && this.fireEvent("beforeshow", this) !== false) {
-            this.hidden = false;
-            this.onBeforeShow();
-            this.afterShow(!!skipAnim);
-        }
-    },
-
-    hide : function(skipAnim) {
-        if (this.hidden) {
-            return;
-        }
-
-        if (this.animate === true && !skipAnim) {
-            if (this.el.shadow) { // honour WindowDrawer's "shadow" config
-                this.el.disableShadow();
-            }
-
-            this.el.slideOut(this.alignToParams.slideDirection, {
-                scope    : this,
-                duration : this.animDuration || .25
-            });
-        } else {
-            Ext.ux.plugins.WindowDrawer.superclass.hide.call(this);
-        }
-
-        // REQUIRED!!!
-        this.hidden = true;
-    },
 
     // private
     init : function(parent) {
-        this.win = parent;
-        this.resizeHandles = this.side; // allow resizing only on 1 side (if resizing is allowed)
+        var me     = this,
+            drawer = me;
+        me.win = parent;
 
         parent.drawers = parent.drawers || {};
-        parent.drawers[this.side] = this; // add this WindowDrawer to the parent's drawer collection
+        parent.drawers[me.side] = me; // add me WindowDrawer to the parent's drawer collection
         parent.on({
-            scope         : this,
-            tofront       : this.onBeforeShow,
-            toback        : this.onBeforeShow,
-            ghost         : this.onBeforeResize,
-            move          : this.alignAndShow,
-            resize        : this.alignAndShow,
-            beforedestroy : this.destroy,
-            render        : function(p) {
-                // render WindowDrawer to parent's container, if available
-                this.render(p.ownerCt? p.ownerCt.getEl() : Ext.getBody());
-            },
-
-            beforehide: function() {
-                this.hide(true);
-            }
+            scope         : me,
+            resize        : me.alignAndShow,
+            show          : me.alignAndShow,
+            beforedestroy : me.onParentBeforeDestroy
         });
+
+
+        //Todo: get ghosting to work.
+        /**
+         * Manage the ghosting, but NOT for IE, which is a complete fail.  IE's filter css prevents the child ghost
+         * from appearing.
+         */
+        if (! Ext.isIE) {
+//            var drawer =  me;  // help keep the sanity!
+            parent.ghost = Ext.Function.createInterceptor(parent.ghost, function() {
+                drawer.el.hide();
+
+                if (drawer.el && ! drawer.hidden) {
+//                    var winGhost    = this.activeGhost,  // this == parent window
+//                        drawerGhost = drawer.ghost();
+//
+//                    winGhost.appendChild(drawerGhost);
+//                    drawerGhost.anchorTo(winGhost.dom, drawer.alignToParams.alignTo, drawer.alignToParams.alignToXY);
+//                    drawerGhost.applyStyles('z-index: -1;');
+//                    winGhost.applyStyles('overflow: visible;');
+                }
+            });
+
+            parent.unghost = Ext.Function.createInterceptor(parent.unghost, function() {
+                Ext.Function.defer(function() {
+
+                    if (! drawer.hidden) {
+                        drawer.setAlignment();
+                        drawer.el.show();
+                    }
+                }, 20);
+            });
+        }
     },
 
     // private
     initComponent : function() {
-        Ext.apply(this, {
-            frame           : true,
-            draggable       : false,
-            modal           : false,
-            closeAction     : 'hide',
-            alignToParams   : {}
-        });
+        var me = this;
+        me.resizeHandles = me.side; // allow resizing only on 1 side (if resizing is allowed)
+        me.alignToParams = {};
 
-        this.on({
+        me.on({                                                     
 			beforeshow : {
-				scope : this,
-				fn    : this.onBeforeShow
+				scope : me,
+				fn    : me.onBeforeShow
 			},
 			beforehide: {
-				scope : this,
-				fn    : this.onBeforeHide
+				scope : me,
+				fn    : me.onBeforeHide
 			}
 		});
 
-        if (this.size) {
-            if (this.side == 'e' || this.side == 'w') {
-                this.width = this.size;
-            } else {
-                this.height = this.size;
+        if (me.size) {
+            if (me.side == 'e' || me.side == 'w') {
+                me.width = me.size;
+            }
+            else {
+                me.height = me.size;
             }
         }
 
-        Ext.ux.plugins.WindowDrawer.superclass.initComponent.call(this, arguments);
-		
+        this.callParent();
+    },
+
+        /**
+     * Show the drawer.
+     * @publich
+     * @param {Boolean} skipAnim Skip animation
+     */
+    show : function(skipAnim) {
+        var me = this;
+        if (me.isAnimating) {
+            return;
+        }
+
+        if (me.hidden && me.fireEvent("beforeshow", me) !== false) {
+            me.hidden = false;
+            me.onBeforeShow();
+            me.afterShow(!!skipAnim);
+        }
+    },
+    toggle : function() {
+        var me = this;
+        if (me.hidden) {
+            me.show();
+        }
+        else {
+            me.hide();
+        }
+    },
+    // private
+    toFront: Ext.emptyFn,
+    /**
+     * Hide the drawer.
+     * @publich
+     * @param {Boolean} skipAnim Skip animation
+     */
+    hide : function(skipAnim) {
+        var me = this;
+
+        if (me.hidden || ! me.rendered) {
+            return;
+        }
+
+        if (me.animate === true && !skipAnim) {
+            if (me.el.shadow) {
+                me.el.disableShadow();
+            }
+            me.isAnimating = true;
+            me.el.slideOut(me.alignToParams.slideDirection, {
+                duration : me.animDuration || .25,
+                callback : me.onAfterAnimHide,
+                scope    : me
+            });
+        }
+        else {
+            this.callParent();
+        }
+
+        // REQUIRED!!!
+        me.hidden = true;
     },
 
     // private
     onBeforeResize : function() {
-        if (!this.hidden) {
-            this.showAgain = true;
+        var me = this;
+
+        if (!me.hidden) {
+            me.showAgain = true;
         }
-        this.hide(true);
+        me.hide(true);
     },
-	
-	//private 
+
+	//private
 	onBeforeHide : function() {
-		if (this.animate) {
-			this.getEl().addClass('x-panel-animated');
+        var me = this;
+        if (me.isAnimating) {
+            return;
+        }
+		if (me.animate) {
+			me.getEl().addCls('x-panel-animated');
 		}
 	},
-		
-
+    /**
+     * @private
+     *
+     */
+	onAfterAnimHide : function() {
+        var me = this;
+        me.isAnimating = false;
+        me.el.setVisible(false);
+    },
+    onParentBeforeDestroy : function() {
+        console.log('beforedestroy')
+        this.el.hide();
+    },
     // private
     onBeforeShow : function() {
-		this.el.addClass('x-panel-animated');		
-        this.setAlignment();
-        this.setZIndex(this.win.el.getZIndex() - 3);
+        var me = this;
+        if (me.rendered) {
+    		me.el.removeCls('x-panel-animated');
+            me.setAlignment();
+            me.setZIndex();
+        }
     },
 
     // private
     afterShow : function(skipAnim) {
-        if (this.animate && !skipAnim) {
-			this.getEl().removeClass('x-panel-animated');
-            this.el.slideIn(this.alignToParams.slideDirection, {
-                scope    : this,
-                duration : this.animDuration || .25,
-                callback : function() {
-                    if (this.el.shadow) { // honour WindowDrawer's "shadow" config
-                        // re-enable shadows after animation
-                        this.el.enableShadow(true);
-                    }
-                    
-                    // REQUIRED!!
-                    this.el.show(); // somehow forces the shadow to appear
-                }
+        var me = this;
+        if (me.animate && !skipAnim) {
+			me.getEl().addCls('x-panel-animated');
+            me.isAnimating = true;
+            me.el.slideIn(me.alignToParams.slideDirection, {
+                scope    : me,
+                duration : me.animDuration || .25,
+                callback : this.onAfterSlideIn
             });
-        } 
+        }
 		else {
-			
-            Ext.ux.plugins.WindowDrawer.superclass.afterShow.call(this);
+            this.el.show();
         }
     },
+    onAfterSlideIn : function() {
+        var me = this;
+        me.isAnimating = false;
+        if (me.el.shadow) { // honour WindowDrawer's "shadow" config
+            // re-enable shadows after animation
+            me.el.enableShadow(true);
+        }
 
+    },
     // private
     alignAndShow : function() {
-        this.setAlignment();
 
-        if (this.showAgain) {
-            this.show(true);
+        var me           = this,
+            renderTarget = document.body;
+
+        if (! renderTarget) {
+            return
         }
-        this.showAgain = false;
+        if (! me.rendered) {
+            me.render(renderTarget);
+        }
+        me.setAlignment();
+
+        if (me.showAgain) {
+            me.show(true);
+        }
+        me.showAgain = false;
     },
 
     // private
     setAlignment:  function() {
-        switch(this.side) {
+
+        var me = this,
+            newParams;
+
+        if (! me.el) {
+            return;
+        }
+
+        switch(me.side) {
             case 'n' :
-                this.setWidth(this.win.el.getWidth() - 10);
-                Ext.apply(this.alignToParams, {
+                me.setWidth(me.win.el.getWidth() - 10);
+                newParams = {
                     alignTo        : 'tl',
-                    alignToXY      :  [5, (this.el.getComputedHeight() * -1) + 5],
+                    alignToXY      :  [5, (me.el.getComputedHeight() * -1) + 3],
                     slideDirection : 'b'
-                });
+                };
                 break;
 
             case 's' :
-                this.setWidth(this.win.el.getWidth() - 10);
-                Ext.apply(this.alignToParams, {
+                me.setWidth(me.win.el.getWidth() - 10);
+                newParams = {
                     alignTo        : 'bl',
-                    alignToXY      :  [5, (Ext.isIE6)? -2 : -7],
+                    alignToXY      :  [5, (Ext.isIE6)? 0 : -3],
                     slideDirection : 't'
-                });
+                };
                 break;
 
             case 'e' :
-                this.setHeight(this.win.el.getHeight() - 10);
-                Ext.apply(this.alignToParams, {
+                me.setHeight(me.win.el.getHeight() - 10);
+                newParams = {
                     alignTo        : 'tr',
-                    alignToXY      :  [-5, 5],
+                    alignToXY      :  [-3, 5],
                     slideDirection : 'l'
-                });
+                };
                 break;
 
             case 'w' :
-                this.setHeight(this.win.el.getHeight() - 10);
-                Ext.apply(this.alignToParams, {
+                me.setHeight(me.win.el.getHeight() - 10);
+                newParams = {
                     alignTo        : 'tl',
-                    alignToXY      :  [(this.el.getComputedWidth() * -1) + 5, 5],
+                    alignToXY      :  [(me.el.getComputedWidth() * -1) + 3, 5],
                     slideDirection : 'r'
-                });
+                };
                 break;
         }
+        Ext.apply(me.alignToParams, newParams);
 
-        if (!this.hidden) {
-            this.el.alignTo(this.win.el, this.alignToParams.alignTo, this.alignToParams.alignToXY);
-
-            // Simple fix for IE, where the bwrap doesn't properly resize.
-            if (Ext.isIE) {
-                this.bwrap.hide();
-                this.bwrap.show();
-            }
+        if (!me.hidden) {
+            me.el.alignTo(me.win.el, me.alignToParams.alignTo, me.alignToParams.alignToXY);
         }
-
         // force doLayout()
-        this.doLayout();
+        me.doLayout();
     },
-   
-	
-    // private
-    toFront: function() {
-        this.win.toFront(); // first bring WindowDrawer's parent to the front
-        //this.setZIndex(this.win.el.getZIndex() - 3); // then place WindowDrawer behind its parent
-        return this;
+    setZIndex : function() {
+        return this.callParent([-3]);
     }
 });
+
