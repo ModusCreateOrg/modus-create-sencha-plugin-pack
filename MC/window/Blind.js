@@ -2,11 +2,11 @@
     Author       : Jay Garcia
     Site         : http://moduscreate.com
     Contact Info : jay@moduscreate.com
-    Purpose      : Window Blinds for Ext 4.x Ext.Window class, which emulates OS X behavior.
+    Purpose      : Window Blinds for Ext 4.1 Ext.Window class, which emulates OS X behavior.
     Warranty     : none
     License      : MIT,
     Price        : free
-    Version      : 1.0
+    Version      : 1.1
     Date         : 05/05/2011
 */
 
@@ -23,8 +23,7 @@
 Ext.define('MC.window.Blind',{
     extend    : 'Ext.panel.Panel',
     height    : 100,
-    alias     : 'plugin.MC.window.Blind',
-    headerSelector : '.x-window-header',
+    alias     : 'plugin.blind',
     style   : 'border-top: none;',
     frame   : true,
     animate : true,
@@ -76,22 +75,27 @@ Ext.define('MC.window.Blind',{
         this.show();
     },
     show : function(skipAnim) {
-        var me = this;
+        var me = this,
+            parentHeader = me.parent.header;
 
-        var parentHeader = me.parent.header;
+
         // <debug>
         if (! parentHeader || parentHeader.dock !== 'top') {
             Ext.Error.raise('A top-docked header must be available for me to attach to!');
             return;
         }
         //</debug>
+
         me.callParent();
         me.el.hide();
         Ext.Function.defer(function() {
             me.el.slideIn('t', {
                 scope    : me,
                 easing   : 'easeOut',
-                duration : me.animDuration
+                duration : me.animDuration,
+                callback : function() {
+                    me.doLayout();
+                }
             });
         });
     },
@@ -206,10 +210,10 @@ Ext.define('MC.window.Blind',{
             parentTitleBarHeight = parentEl.child(hdrSelector).getHeight();
 
             if (isParentWindow) {
-                newParentHeight = parentTitleBarHeight + 5;
+                newParentHeight = parentTitleBarHeight + 20;
             }
             else if (isParentPanel) {
-                newParentHeight = parentTitleBarHeight - 1;
+                newParentHeight = parentTitleBarHeight + 16;
             }
 
         }
@@ -219,7 +223,8 @@ Ext.define('MC.window.Blind',{
         potentialHeight = parent.body.getHeight() + (parentTitleBarHeight - me.offsetHeight);
 
         me.renderTo = parentEl;
-        me.style    = (me.style || '') + 'z-index: 101;position:absolute;top: ' + newParentHeight +'px; left: 10px;';
+        me.style    = (me.style || '') + 'z-index: 101;position:absolute;top: '
+            + newParentHeight +'px; left: 10px;';
         this.onWinResize(me.parent);
     },
     // private
@@ -234,5 +239,6 @@ Ext.define('MC.window.Blind',{
             newHeight       = amITaller ? potentialHeight : origHeight;
 
         me.setSize(newWidth,newHeight);
+        me.doLayout();
     }
 });
