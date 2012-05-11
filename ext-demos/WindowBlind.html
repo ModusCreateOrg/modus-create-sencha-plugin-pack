@@ -1,0 +1,84 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>Jay Garcia ext-dev.js dev page</title>
+
+    <!-- ExtJS -->
+    <link rel="stylesheet" type="text/css" href="../sdk/extjs/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../sdk/extjs/ext-dev.js"></script>
+    <script type="text/javascript">
+        Ext.require('Ext.window.Window');
+
+        Ext.Loader.setConfig({
+            enabled : true,
+            paths   : {
+                MC : '../js/MC'
+            }
+        });
+
+        Ext.require('MC.window.Blind');
+
+        Ext.onReady(function(){
+
+            var baseCfg = {
+                height   : 250,
+                width    : 300,
+                closable : false,
+                title    : 'Window Blind test',
+                html     : 'This is a blind test',
+                plugins  : [
+                    {
+                        ptype   : 'MC.window.Blind',
+                        border  : false,
+                        height  : 250,
+                        width   : 200,
+                        animate : true,
+                        html  : 'window blind',
+                        buttons : [
+                            {
+                                text    : 'OK',
+                                handler : function() {
+                                    this.ownerCt.ownerCt.hide();
+                                }
+                            }
+                        ]
+                    }
+                ],
+                dockedItems : [
+                    {
+                        xtype : 'toolbar',
+                        weight : 99,
+                        dock  : 'bottom',
+                        items : [
+                            {
+                                text : 'Button'
+                            }
+                        ]
+                    }
+                ],
+                buttons  :  [
+                    {
+                        text    : 'Show blind',
+                        handler : function(btn) {
+                            btn.ownerCt.ownerCt.fireEvent('showblind');
+                        }
+                    }
+                ]
+            };
+
+            var panelCfg = Ext.apply({
+                style    : 'margin: 20px;',
+                frame    : true,
+                renderTo : Ext.getBody()
+            }, baseCfg);
+
+            new Ext.Panel(panelCfg);
+
+            new Ext.Window(baseCfg).show();
+        });
+
+    </script>
+</head>
+<body>
+</body>
+</html>

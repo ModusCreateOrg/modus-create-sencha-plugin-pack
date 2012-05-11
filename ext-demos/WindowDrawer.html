@@ -1,0 +1,132 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>Window Drawer test page</title>
+
+    <!-- ExtJS -->
+    <link rel="stylesheet" type="text/css" href="../sdk/extjs/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../sdk/extjs/ext-dev.js"></script>
+    <script type="text/javascript">
+
+        Ext.Loader.setConfig({
+            enabled : true,
+            paths   : {
+                Ext : '../sdk/extjs/src/',
+                MC : '../js/MC'
+            }
+        });
+
+        Ext.require('Ext.window.Window');
+        Ext.require('MC.window.Drawer');
+
+
+        if (! window.console) {
+            window.console = {
+                info : function(){},
+                warn : function(){},
+                log  : function(){}
+            }
+        }
+        Ext.onReady(function(){
+            var baseCfg = {
+                width         : 20,
+//                side         : 'e', // Can be n e s w (North, East, South, West)
+                animate      : true,
+                animDuration : 500,
+                layout       : 'fit',
+                border       : false,
+                items        : {
+                    xtype : 'button',
+                    text : 'Hide me',
+                    handler : function() {
+                        this.ownerCt.hide();
+                    }
+                }
+            };
+
+            var rightDrawer  = Ext.create('MC.window.Drawer', Ext.applyIf({ side : 'e' } , baseCfg)),
+                leftDrawer   = Ext.create('MC.window.Drawer', Ext.applyIf({ side : 'w' } , baseCfg)),
+                topDrawer    = Ext.create('MC.window.Drawer', Ext.applyIf({ side : 'n', size: 75 } , baseCfg)),
+                bottomDrawer = Ext.create('MC.window.Drawer', Ext.applyIf({ side : 's', size: 75 } , baseCfg));
+
+            var win  = Ext.create('Ext.window.Window',{
+                height : 200,
+                width  : 149,
+                layout : {
+                    type  : 'vbox',
+                    align : 'stretch'
+                },
+                items   : [
+                    {
+                        xtype   : 'button',
+                        flex    : 1,
+                        text    : 'Show all drawers!',
+                        handler : function() {
+                            var drawers = this.ownerCt.drawers;
+                            drawers.e.show();
+                            drawers.n.show();
+                            drawers.s.show();
+                            drawers.w.show();
+                        }
+                    },
+                    {
+                        xtype   : 'button',
+                        flex    : 1,
+                        text    : 'Hide all drawers!',
+                        handler : function() {
+                            var drawers = this.ownerCt.drawers;
+                            drawers.e.hide();
+                            drawers.n.hide();
+                            drawers.s.hide();
+                            drawers.w.hide();
+                        }
+                    }
+
+                ],
+                plugins : [
+                    rightDrawer,
+                    leftDrawer,
+                    bottomDrawer,
+                    topDrawer
+                ],
+                tbar : [
+                    {
+                        text : 'North drawer',
+                        handler : function() {
+                            win.drawers.n.toggle();
+                        }
+                    },
+                    '->',
+                    {
+                        text : 'South drawer',
+                        handler : function() {
+                            win.drawers.s.toggle();
+                        }
+                    }
+                ],
+                bbar : [
+                    {
+                        text : 'West drawer',
+                        handler : function() {
+                            win.drawers.w.toggle();
+                        }
+                    },
+                    '->',
+                    {
+                        text : 'East drawer',
+                        handler : function() {
+                            win.drawers.e.toggle();
+                        }
+                    }
+                ]
+            });
+            win.show();
+
+
+        });
+
+    </script>
+</head>
+<body>
+</body>
+</html>
