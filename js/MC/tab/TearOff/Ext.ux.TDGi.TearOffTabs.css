@@ -1,0 +1,54 @@
+.mcp-tearofftabs-psuedo-tabstrip-bg{
+    background-color:#cedff5;
+	background-image: url(/ext3/resources/css/images/images/default/tabs/tab-strip-bg.gif);
+    font:normal 11px tahoma,arial,helvetica;
+    padding: 2px;
+	color:#416aa3;
+    border: 1px solid;
+    width : 100;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+
+}
+
+.mcp-tearofftabs-psuedo-tabstrip-bg li {
+    list-style-type: none;
+}
+
+.mcp-tearofftabs-psuedo-tabstrip-bg a {
+    /*margin-left: 3px;*/
+    text-decoration: none;
+    color:#15428b;
+    font-weight:bold;
+}
+
+.mcp-tearofftabs-psuedo-tabstrip-bg .x-tab-right,.mcp-tearofftabs-psuedo-tabstrip-bg .x-tab-left, .mcp-tearofftabs-psuedo-tabstrip-bg .x-tab-strip-inner{
+	background-image: url(/ext3/resources/css/images/images/default/tabs/tabs-sprite.gif);
+}
+
+.mcp-tearofftabs-dragdrop-drag-ghost{
+	color:#000;
+	font: normal 11px arial, helvetica, sans-serif;
+    border-color: #ddd #bbb #bbb #ddd;
+	background-color:#fff;
+}
+
+.mcp-tearofftabs-dragdrop-drop-nodrop .mcp-tearofftabs-dragdrop-drop-icon{
+  /*background-image: url(../images/default/dd/drop-no.gif);*/
+  background-image: none;
+}
+
+.mcp-tearofftabs-dragdrop-drop-ok .mcp-tearofftabs-dragdrop-drop-icon{
+  background-image: none;
+  /*background-image: url(../images/default/dd/drop-yes.gif);*/
+}
+
+.mcp-tearofftabs-dragdrop-drop-ok-add .mcp-tearofftabs-dragdrop-drop-icon{
+  background-image: none;
+}
+
+.x-view-selector {
+    background-color:#D6D6D6;
+    border-color:#888888;
+}
