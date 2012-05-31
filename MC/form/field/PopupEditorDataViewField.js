@@ -11,9 +11,9 @@
  * div exists outside of the item nodes.
  */
 Ext.define('MC.form.field.PopupEditorDataViewField', {
-	extend: 'MC.form.field.DataViewField',
+    extend: 'MC.form.field.DataViewField',
 	
-	addIconCls: 'add-icon',
+    addIconCls: 'add-icon',
     editIconCls: 'edit-icon',
     deleteIconCls: 'delete-icon',
 

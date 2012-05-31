@@ -1,3 +1,23 @@
+/**
+ * This is a Form Panel that allows for simplified integration with
+ * Models. It can be instantiated in one of three ways:
+ * 
+ * Create empty record
+ * Ext.create('MC.form.Panel', { model: 'MC.model.MyModel' });
+ *
+ * Modify an existing record for which you only have the id
+ * Ext.create('MC.form.Panel', { 
+ *     model: 'MC.model.MyModel', 
+ *     modelId: 1234
+ * });
+ *
+ * Modify a record for which you have an existing model
+ * Ext.create('MC.form.Panel', { model: myModelInstance });
+ *
+ * Invoking myFormPanel.commit() will save the record forcing
+ * the data to be written if a proxy (with a writer) is defined 
+ * on the Model.
+ */
 Ext.define('MC.form.Panel', {
     extend: 'Ext.form.Panel',
 
