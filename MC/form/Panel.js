@@ -59,11 +59,24 @@ Ext.define('MC.form.Panel', {
             this.bindModel(this.model);
 
         }
+
+        this.addEvents('loadsuccess', 'loadfailure', 'savesuccess', 'savefailure');
     },
 
     bindModel: function(model) {
+        var i, len, associations = model.associations.items, name, field;
+        
         this.model = model;
         this.loadRecord(model);
+
+        // loadRecord() won't include associated data, so let's do that.
+        for (i=0, len=associations.length; i<len; i++) {
+            name = associations[i].name;
+            field = this.down('[name='+name+']');
+            if (field && field.isFormField && field.bindStore) {
+                field.bindStore(model[name]());
+            }
+        }
     },
 
     commit: function(callback, scope) {
@@ -73,9 +86,9 @@ Ext.define('MC.form.Panel', {
             this.model.save({
                 callback: function(records, operation) {
                     if (operation.wasSuccessful()) {
-                        this.onModelSaveSuccess(records, operation);
+                        this.fireEvent('savesuccess', this, records, operation);
                     } else {
-                        this.onModelSaveFailure(records, operation);
+                        this.fireEvent('savefailure', this, records, operation);
                     }
                     if (callback) {
                         callback.call(scope || this, this, operation.wasSuccessful(), this.model);
@@ -88,20 +101,11 @@ Ext.define('MC.form.Panel', {
 
     onModelLoadSuccess: function(record, operation) {
         this.bindModel(record);
+        this.fireEvent('loadsuccess', this, record, operation);
     },
 
     onModelLoadFailure: function(record, operation) {
-        Ext.Msg.alert('Error', 'Form data could not be loaded.');
-    },
-
-    onModelSaveSuccess: function(records, operation) {
-        //This will reset the original values of the form so it's no longer dirty
-        this.loadRecord(this.model);
-        Ext.Msg.alert('Success', 'Form data was successfully saved!.');
-    },
-
-    onModelSaveFailure: function(records, operation) {
-        Ext.Msg.alert('Error', 'An error occurred saving your changes. Please try again.');
+        this.fireEvent('loadfailure', this, record, operation);
     }
 
 });

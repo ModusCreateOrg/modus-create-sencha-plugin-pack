@@ -56,10 +56,10 @@ Ext.define('MC.form.field.DataViewField', {
     calculateValue: function() {
         var values = [], r, rLen, record, value, c, cLen, fieldName;
         
-        for (r=0, rLen=this.store.getCount(); r&lt;rLen; r++) {
+        for (r=0, rLen=this.store.getCount(); r<rLen; r++) {
             record = this.store.getAt(r);
             value = {};
-            for (c=0, cLen=record.fields.getCount(); c&lt;cLen; c++) {
+            for (c=0, cLen=record.fields.getCount(); c<cLen; c++) {
                 fieldName = record.fields.getAt(c);
                 value[fieldName] = record.get(fieldName);
             }
