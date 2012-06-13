@@ -50,24 +50,23 @@ Ext.define('MC.form.Panel', {
 
             //Load an empty record to be inserted
             } else {
-                this.bindModel(Ext.create(this.model, {}));
+                this.loadRecord(Ext.create(this.model, {}));
             }
 
         } else {
 
             //Bind the provided model to be updated
-            this.bindModel(this.model);
+            this.loadRecord(this.model);
 
         }
 
         this.addEvents('loadsuccess', 'loadfailure', 'savesuccess', 'savefailure');
     },
 
-    bindModel: function(model) {
+    loadRecord: function(model) {
         var i, len, associations = model.associations.items, name, field;
         
-        this.model = model;
-        this.loadRecord(model);
+        this.callParent(arguments);
 
         // loadRecord() won't include associated data, so let's do that.
         for (i=0, len=associations.length; i<len; i++) {
@@ -81,7 +80,7 @@ Ext.define('MC.form.Panel', {
 
     commit: function(callback, scope) {
         if (this.form.isDirty()) {
-            this.form.updateRecord(this.model);
+            this.form.updateRecord(this.getRecord());
 
             this.model.save({
                 callback: function(records, operation) {
@@ -100,7 +99,7 @@ Ext.define('MC.form.Panel', {
     },
 
     onModelLoadSuccess: function(record, operation) {
-        this.bindModel(record);
+        this.loadRecord(record);
         this.fireEvent('loadsuccess', this, record, operation);
     },
 
